@@ -1,3 +1,8 @@
 archive-2/
 .DS_Store
 **.DS_Store
+archive-2_clean/
+archive-2_no_dupes/
+test/
+train/
+validacion/
