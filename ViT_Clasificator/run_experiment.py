@@ -11,9 +11,9 @@ from torch.utils.data import DataLoader
 from model.model import Model
 from data.data import Dataset
 from data.transform import transforms_train, transforms_val
-from train.train import fit
-from test.test import test
-from test.evaluate import evaluate, save_results
+from train_model.train import fit
+from test_model.test import test
+from test_model.evaluate import evaluate, save_results
 from utils.utils import load_labels
 from stats.statistics import (
     cochrans_q,
