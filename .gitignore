@@ -6,3 +6,4 @@ archive-2_no_dupes/
 test/
 train/
 validacion/
+synthetic_images/imagenes_*/
