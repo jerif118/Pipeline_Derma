@@ -7,3 +7,5 @@ test/
 train/
 validacion/
 synthetic_images/imagenes_*/
+train_scenarios/train_deficit/
+train_scenarios/train_total/
