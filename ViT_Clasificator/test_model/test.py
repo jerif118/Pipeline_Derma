@@ -29,9 +29,11 @@ def test(model, dataloader):
                 loss_class = criterion_class(y_class_hat, y_class)
                 test_loss_bin.append(loss_bin.item())
                 test_loss_class.append(loss_class.item())
-
-            bin_proba = torch.sigmoid(y_bin_hat.squeeze(1)).cpu()
-            class_proba = torch.softmax(y_class_hat, dim=1).cpu()
+                
+            bin_logits = y_bin_hat.squeeze(1).detach().float()
+            class_logits = y_class_hat.detach().float()
+            bin_proba = torch.sigmoid(bin_logits).cpu()
+            class_proba = torch.softmax(class_logits, dim=1).cpu()
 
             if valid_mask.sum() > 0:
                 all_y_bin.append(y_bin[valid_mask].cpu())
