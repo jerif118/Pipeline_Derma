@@ -41,12 +41,12 @@ def test(model, dataloader):
             all_y_class_hat.append(torch.argmax(y_class_hat, dim=1).cpu())
             all_y_class_proba.append(class_proba)
 
-    all_y_bin = torch.cat(all_y_bin).numpy() if all_y_bin else np.array([])
-    all_y_bin_hat = torch.cat(all_y_bin_hat).numpy() if all_y_bin_hat else np.array([])
-    all_y_bin_proba = torch.cat(all_y_bin_proba).numpy() if all_y_bin_proba else np.array([])
-    all_y_class = torch.cat(all_y_class).numpy()
-    all_y_class_hat = torch.cat(all_y_class_hat).numpy()
-    all_y_class_proba = torch.cat(all_y_class_proba).numpy()
+    all_y_bin = torch.cat(all_y_bin).cpu().numpy() if all_y_bin else np.array([])
+    all_y_bin_hat = torch.cat(all_y_bin_hat).cpu().numpy() if all_y_bin_hat else np.array([])
+    all_y_bin_proba = torch.cat(all_y_bin_proba).cpu().numpy() if all_y_bin_proba else np.array([])
+    all_y_class = torch.cat(all_y_class).cpu().numpy()
+    all_y_class_hat = torch.cat(all_y_class_hat).cpu().numpy()
+    all_y_class_proba = torch.cat(all_y_class_proba).cpu().numpy()
 
     acc_bin = accuracy_score(all_y_bin, all_y_bin_hat) if len(all_y_bin) > 0 else 0.0
     acc_class = accuracy_score(all_y_class, all_y_class_hat)
