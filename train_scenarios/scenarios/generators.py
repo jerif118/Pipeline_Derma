@@ -1,9 +1,6 @@
 from pathlib import Path
 from typing import Dict, List
-from utils import (
-    clear_dir, ensure_dir, proportional_count, safe_sample,
-    copy_selected_images, build_dataset_json, summarize_selection, save_json
-)
+from scenarios.utils import clear_dir, ensure_dir, proportional_count, safe_sample,copy_selected_images, build_dataset_json, summarize_selection, save_json
 
 def generate_deficit_fill(
     real_by_class: Dict[str, List[Path]],
