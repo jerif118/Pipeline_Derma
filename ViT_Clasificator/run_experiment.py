@@ -31,6 +31,17 @@ def set_seed(seed):
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
+def json_serializer(obj):
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        return float(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+
 
 def run_single(run_id, args, train_dir, output_dir):
     seed = args.base_seed + run_id
@@ -338,7 +349,7 @@ def run_statistical_tests(scenario_data: dict[str, list[dict]], output_dir: str)
         "per_run": q_results_per_run,
     }
     with open(os.path.join(stats_dir, "cochrans_q.json"), "w") as f:
-        json.dump(q_summary, f, indent=2)
+        json.dump(q_summary, f, indent=2, default=json_serializer)
 
     print(f"\n{'='*60}")
     print("COCHRAN'S Q TEST (por corrida)")
@@ -376,7 +387,7 @@ def run_statistical_tests(scenario_data: dict[str, list[dict]], output_dir: str)
                   f"(mediana p_adj={median_p:.5f})")
 
         with open(os.path.join(stats_dir, "mcnemar_posthoc_summary.json"), "w") as f:
-            json.dump(pair_summary, f, indent=2)
+            json.dump(pair_summary, f, indent=2, default=json_serializer)
     else:
         print("\n  Cochran's Q no fue significativo en ninguna corrida → no se ejecutó McNemar.")
 
@@ -391,7 +402,7 @@ def run_statistical_tests(scenario_data: dict[str, list[dict]], output_dir: str)
             boot_results[name][mk] = scalar_bootstrap_ci(values)
 
     with open(os.path.join(stats_dir, "bootstrap_ci_per_scenario.json"), "w") as f:
-        json.dump(boot_results, f, indent=2)
+        json.dump(boot_results, f, indent=2, default=json_serializer)
 
     print(f"\nBootstrap 95% CI por escenario (sobre {n_runs} valores escalares):")
     for name, metrics_ci in boot_results.items():
