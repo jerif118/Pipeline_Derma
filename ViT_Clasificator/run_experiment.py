@@ -63,8 +63,8 @@ def run_single(run_id, args, train_dir, output_dir):
     val_ds = Dataset(args.val_dir, val_labels, val_labels_bin, transform=val_t)
 
     dataloader = {
-        "train": DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=2),
-        "val": DataLoader(val_ds, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=2),
+        "train": DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=6),
+        "val": DataLoader(val_ds, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=6),
     }
 
     # --- Class weights (inverse frequency) para CrossEntropyLoss ---
