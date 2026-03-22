@@ -52,8 +52,8 @@ def run_single(run_id, args, train_dir, output_dir):
     val_ds = Dataset(args.val_dir, val_labels, val_labels_bin, transform=val_t)
 
     dataloader = {
-        "train": DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=4),
-        "val": DataLoader(val_ds, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=4),
+        "train": DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=10),
+        "val": DataLoader(val_ds, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=10),
     }
 
     # --- Class weights (inverse frequency) para CrossEntropyLoss ---
@@ -95,7 +95,7 @@ def run_single(run_id, args, train_dir, output_dir):
     test_labels = load_labels(args.test_dir, args.file_json)
     test_labels_bin = load_labels(args.test_dir, args.file_binary_json)
     test_ds = Dataset(args.test_dir, test_labels, test_labels_bin, transform=val_t)
-    test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=4)
+    test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=10)
 
     # --- Test ---
     test_out = test(model, test_loader)
