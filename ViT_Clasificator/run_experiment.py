@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from model.model import Model
 from data.data import Dataset
-from data.transform import transforms_train, transforms_val
+from data.transform import transforms_cpu_train, transforms_cpu_val
 from train_model.train import fit
 from test_model.test import test
 from test_model.evaluate import evaluate, save_results
@@ -56,15 +56,15 @@ def run_single(run_id, args, train_dir, output_dir):
     val_labels = load_labels(args.val_dir, args.file_json)
     val_labels_bin = load_labels(args.val_dir, args.file_binary_json)
 
-    train_t = transforms_train()
-    val_t = transforms_val()
+    train_t = transforms_cpu_train()
+    val_t = transforms_cpu_val()
 
     train_ds = Dataset(train_dir, train_labels, train_labels_bin, transform=train_t)
     val_ds = Dataset(args.val_dir, val_labels, val_labels_bin, transform=val_t)
 
     dataloader = {
-        "train": DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=10),
-        "val": DataLoader(val_ds, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=10),
+        "train": DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=2),
+        "val": DataLoader(val_ds, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=2),
     }
 
     # --- Class weights (inverse frequency) para CrossEntropyLoss ---
@@ -106,7 +106,7 @@ def run_single(run_id, args, train_dir, output_dir):
     test_labels = load_labels(args.test_dir, args.file_json)
     test_labels_bin = load_labels(args.test_dir, args.file_binary_json)
     test_ds = Dataset(args.test_dir, test_labels, test_labels_bin, transform=val_t)
-    test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=10)
+    test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True, persistent_workers=True, prefetch_factor=2)
 
     # --- Test ---
     test_out = test(model, test_loader)

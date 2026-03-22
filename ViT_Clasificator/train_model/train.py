@@ -3,6 +3,7 @@ import numpy as np
 import csv
 import os
 from tqdm import tqdm
+from data.transform import transforms_gpu_train, transforms_gpu_val
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -13,6 +14,8 @@ def fit(model, dataloader, epochs=5, lr=0.001, w_bin=0.5, w_class=0.5, max_norm=
     if class_weights is not None:
         class_weights = torch.tensor(class_weights, dtype=torch.float32).to(device)
     criterion_class = torch.nn.CrossEntropyLoss(weight=class_weights)
+    transform_train = transforms_gpu_train()
+    transform_val = transforms_gpu_val()
     history = []
     for epoch in range(1,epochs+1):
         model.train()
@@ -21,6 +24,7 @@ def fit(model, dataloader, epochs=5, lr=0.001, w_bin=0.5, w_class=0.5, max_norm=
         for batch in bar:
             X, y_bin, y_class = batch
             X, y_bin, y_class = X.to(device,non_blocking=True), y_bin.to(device, non_blocking=True), y_class.to(device, non_blocking=True)
+            X =transform_train(X)
             optimizer.zero_grad(set_to_none=True)
             with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=(device=="cuda")):
                 y_bin_hat, y_class_hat = model(X)
@@ -49,6 +53,7 @@ def fit(model, dataloader, epochs=5, lr=0.001, w_bin=0.5, w_class=0.5, max_norm=
             for batch in bar:
                 X, y_bin, y_class = batch
                 X, y_bin, y_class = X.to(device, non_blocking=True), y_bin.to(device, non_blocking=True), y_class.to(device, non_blocking=True)
+                X = transform_val(X)
                 with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=(device=="cuda")):
                     y_bin_hat, y_class_hat = model(X)
                     valid_mask = (y_bin != -1)

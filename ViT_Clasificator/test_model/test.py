@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from tqdm import tqdm
 from sklearn.metrics import accuracy_score
+from data.transform import transforms_gpu_val
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -11,6 +12,7 @@ def test(model, dataloader):
     model.eval()
     criterion_bin = torch.nn.BCEWithLogitsLoss(reduction='none')
     criterion_class = torch.nn.CrossEntropyLoss()
+    transform_test = transforms_gpu_val()
 
     all_y_bin, all_y_bin_hat, all_y_bin_proba = [], [], []
     all_y_class, all_y_class_hat, all_y_class_proba = [], [], []
@@ -21,6 +23,7 @@ def test(model, dataloader):
         for batch in bar:
             X, y_bin, y_class = batch
             X, y_bin, y_class = X.to(device), y_bin.to(device), y_class.to(device)
+            X = transform_test(X)
             with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=(device == "cuda")):
                 y_bin_hat, y_class_hat = model(X)
                 valid_mask = (y_bin != -1)
