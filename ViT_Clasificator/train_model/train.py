@@ -20,7 +20,7 @@ def fit(model, dataloader, epochs=5, lr=0.001, w_bin=0.5, w_class=0.5, max_norm=
         bar = tqdm(dataloader['train'])
         for batch in bar:
             X, y_bin, y_class = batch
-            X, y_bin, y_class = X.to(device), y_bin.to(device), y_class.to(device)
+            X, y_bin, y_class = X.to(device,non_blocking=True), y_bin.to(device, non_blocking=True), y_class.to(device, non_blocking=True)
             optimizer.zero_grad(set_to_none=True)
             with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=(device=="cuda")):
                 y_bin_hat, y_class_hat = model(X)
@@ -48,7 +48,7 @@ def fit(model, dataloader, epochs=5, lr=0.001, w_bin=0.5, w_class=0.5, max_norm=
         with torch.no_grad():
             for batch in bar:
                 X, y_bin, y_class = batch
-                X, y_bin, y_class = X.to(device), y_bin.to(device), y_class.to(device)
+                X, y_bin, y_class = X.to(device, non_blocking=True), y_bin.to(device, non_blocking=True), y_class.to(device, non_blocking=True)
                 with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=(device=="cuda")):
                     y_bin_hat, y_class_hat = model(X)
                     valid_mask = (y_bin != -1)
