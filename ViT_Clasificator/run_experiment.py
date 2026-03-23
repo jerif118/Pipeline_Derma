@@ -43,6 +43,13 @@ def json_serializer(obj):
     raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
 
+# Helper to ensure parent dir exists
+def ensure_parent_dir(path: str) -> None:
+    parent = os.path.dirname(path)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
+
+
 def run_single(run_id, args, train_dir, output_dir):
     seed = args.base_seed + run_id
     set_seed(seed)
@@ -80,6 +87,7 @@ def run_single(run_id, args, train_dir, output_dir):
     run_dir = os.path.join(output_dir, f"run_{run_id}")
     os.makedirs(run_dir, exist_ok=True)
     log_path = os.path.join(run_dir, "training_log.csv")
+    ensure_parent_dir(log_path)
 
     history = fit(
         model, dataloader,
@@ -95,7 +103,9 @@ def run_single(run_id, args, train_dir, output_dir):
     plot_training_curves(history, run_dir)
 
     # --- Guardar history de entrenamiento ---
-    with open(os.path.join(run_dir, "training_history.json"), "w") as f:
+    history_path = os.path.join(run_dir, "training_history.json")
+    ensure_parent_dir(history_path)
+    with open(history_path, "w") as f:
         json.dump(history, f, indent=2)
 
     # --- Guardar pesos ---
@@ -119,8 +129,10 @@ def run_single(run_id, args, train_dir, output_dir):
     save_results(test_out["results"], eval_metrics, run_dir, run_id=run_id)
 
     # Guardar predicciones raw para análisis estadístico posterior
+    predictions_path = os.path.join(run_dir, "predictions.npz")
+    ensure_parent_dir(predictions_path)
     np.savez(
-        os.path.join(run_dir, "predictions.npz"),
+        predictions_path,
         y_bin=test_out["y_bin"],
         y_bin_hat=test_out["y_bin_hat"],
         y_bin_proba=test_out["y_bin_proba"],
@@ -202,7 +214,9 @@ def aggregate_results(all_run_data, output_dir):
                 boot_ci_bin[k] = scalar_bootstrap_ci(values)
 
     # JSON
-    with open(os.path.join(output_dir, "summary.json"), "w") as f:
+    summary_json_path = os.path.join(output_dir, "summary.json")
+    ensure_parent_dir(summary_json_path)
+    with open(summary_json_path, "w") as f:
         json.dump({
             "metrics": stats_summary,
             "bootstrap_ci_class": boot_ci_class,
@@ -210,7 +224,9 @@ def aggregate_results(all_run_data, output_dir):
         }, f, indent=2)
 
     # CSV
-    with open(os.path.join(output_dir, "summary.csv"), "w", newline="") as f:
+    summary_csv_path = os.path.join(output_dir, "summary.csv")
+    ensure_parent_dir(summary_csv_path)
+    with open(summary_csv_path, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["metric", "mean", "std", "min", "max"])
         for k, v in stats_summary.items():
@@ -263,7 +279,9 @@ def plot_training_curves(history, run_dir):
         ax.grid(alpha=0.25)
 
     plt.tight_layout()
-    fig.savefig(os.path.join(run_dir, "training_curves.png"), dpi=150)
+    plot_path = os.path.join(run_dir, "training_curves.png")
+    ensure_parent_dir(plot_path)
+    fig.savefig(plot_path, dpi=150)
     plt.close(fig)
 
 
@@ -291,7 +309,9 @@ def run_statistical_tests(scenario_data: dict[str, list[dict]], output_dir: str)
         ])
 
     pair_results = compare_scenarios(ba_per_scenario)
-    with open(os.path.join(stats_dir, "paired_comparisons_ba.json"), "w") as f:
+    paired_path = os.path.join(stats_dir, "paired_comparisons_ba.json")
+    ensure_parent_dir(paired_path)
+    with open(paired_path, "w") as f:
         json.dump(pair_results, f, indent=2, default=str)
 
     print(f"\n{'='*60}")
@@ -348,7 +368,9 @@ def run_statistical_tests(scenario_data: dict[str, list[dict]], output_dir: str)
         "median_p": float(np.median(q_p_values)),
         "per_run": q_results_per_run,
     }
-    with open(os.path.join(stats_dir, "cochrans_q.json"), "w") as f:
+    q_path = os.path.join(stats_dir, "cochrans_q.json")
+    ensure_parent_dir(q_path)
+    with open(q_path, "w") as f:
         json.dump(q_summary, f, indent=2, default=json_serializer)
 
     print(f"\n{'='*60}")
@@ -363,7 +385,9 @@ def run_statistical_tests(scenario_data: dict[str, list[dict]], output_dir: str)
     if mcnemar_results_per_run:
         import pandas as pd
         all_posthoc = pd.concat(mcnemar_results_per_run, ignore_index=True)
-        all_posthoc.to_csv(os.path.join(stats_dir, "mcnemar_posthoc_per_run.csv"), index=False)
+        posthoc_csv_path = os.path.join(stats_dir, "mcnemar_posthoc_per_run.csv")
+        ensure_parent_dir(posthoc_csv_path)
+        all_posthoc.to_csv(posthoc_csv_path, index=False)
 
         # Resumir por par: en cuántas corridas fue significativo
         from itertools import combinations
@@ -386,7 +410,9 @@ def run_statistical_tests(scenario_data: dict[str, list[dict]], output_dir: str)
             print(f"  {a} vs {b}: significativo en {n_sig}/{len(pair_rows)} corridas "
                   f"(mediana p_adj={median_p:.5f})")
 
-        with open(os.path.join(stats_dir, "mcnemar_posthoc_summary.json"), "w") as f:
+        mcnemar_summary_path = os.path.join(stats_dir, "mcnemar_posthoc_summary.json")
+        ensure_parent_dir(mcnemar_summary_path)
+        with open(mcnemar_summary_path, "w") as f:
             json.dump(pair_summary, f, indent=2, default=json_serializer)
     else:
         print("\n  Cochran's Q no fue significativo en ninguna corrida → no se ejecutó McNemar.")
@@ -401,7 +427,9 @@ def run_statistical_tests(scenario_data: dict[str, list[dict]], output_dir: str)
             values = [r["eval_metrics"]["metrics_class"][mk] for r in runs]
             boot_results[name][mk] = scalar_bootstrap_ci(values)
 
-    with open(os.path.join(stats_dir, "bootstrap_ci_per_scenario.json"), "w") as f:
+    bootstrap_path = os.path.join(stats_dir, "bootstrap_ci_per_scenario.json")
+    ensure_parent_dir(bootstrap_path)
+    with open(bootstrap_path, "w") as f:
         json.dump(boot_results, f, indent=2, default=json_serializer)
 
     print(f"\nBootstrap 95% CI por escenario (sobre {n_runs} valores escalares):")
@@ -457,7 +485,9 @@ def main():
     # Guardar configuración
     config = vars(args).copy()
     config["scenarios_resolved"] = scenarios
-    with open(os.path.join(args.output_dir, "config.json"), "w") as f:
+    config_path = os.path.join(args.output_dir, "config.json")
+    ensure_parent_dir(config_path)
+    with open(config_path, "w") as f:
         json.dump(config, f, indent=2)
 
     # ── Ejecutar cada escenario ──

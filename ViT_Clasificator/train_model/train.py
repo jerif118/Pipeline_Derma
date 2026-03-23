@@ -84,6 +84,9 @@ def fit(model, dataloader, epochs=5, lr=0.001, w_bin=0.5, w_class=0.5, max_norm=
         history.append(row)
         print(f"Epoch {epoch}/{epochs} binary: loss {row['train_loss_bin']:.5f} val_loss {row['val_loss_bin']:.5f} acc {row['train_acc_bin']:.5f} val_acc {row['val_acc_bin']:.5f}, class: loss {row['train_loss_class']:.5f} val_loss {row['val_loss_class']:.5f} acc {row['train_acc_class']:.5f} val_acc {row['val_acc_class']:.5f}")
     if log_path:
+        log_dir = os.path.dirname(log_path)
+        if log_dir:
+            os.makedirs(log_dir, exist_ok=True)
         write_header = not os.path.exists(log_path)
         with open(log_path, "a", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=history[0].keys())

@@ -22,7 +22,7 @@ def test(model, dataloader):
     with torch.no_grad():
         for batch in bar:
             X, y_bin, y_class = batch
-            X, y_bin, y_class = X.to(device), y_bin.to(device), y_class.to(device)
+            X, y_bin, y_class = X.to(device, non_blocking=True), y_bin.to(device, non_blocking=True), y_class.to(device, non_blocking=True)
             X = transform_test(X)
             with torch.autocast(device_type="cuda", dtype=torch.bfloat16, enabled=(device == "cuda")):
                 y_bin_hat, y_class_hat = model(X)
