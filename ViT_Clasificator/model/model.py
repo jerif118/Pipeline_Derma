@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class Model(nn.Module):
-    def __init__(self,n_binary=1,n_outputs=11, freeze=False):
+    def __init__(self,n_binary=1,n_outputs=11, freeze=True):
         super().__init__()
         self.dino = torch.hub.load('facebookresearch/dinov2', 'dinov2_vitb14_reg')
         if freeze:
