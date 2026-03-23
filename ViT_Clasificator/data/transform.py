@@ -1,7 +1,8 @@
 from torchvision import transforms
 
-def transforms_cpu_train():
+def transforms_cpu_train(image_size=(252, 252)):
     return transforms.Compose([
+        transforms.Resize((int(image_size[0] * 1.15), int(image_size[1] * 1.15))),
         transforms.ToTensor(),
     ])
 
