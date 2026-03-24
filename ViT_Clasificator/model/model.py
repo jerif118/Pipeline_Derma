@@ -11,13 +11,13 @@ class Model(nn.Module):
         self.bh = nn.Sequential(
             nn.Linear(768,128),
             nn.ReLU(),
-            nn.Dropout(0.3),
+            nn.Dropout(0.5),
             nn.Linear(128,n_binary)
         )
         self.fh = torch.nn.Sequential(
             nn.Linear(768,128),
             nn.ReLU(),
-            nn.Dropout(0.3),
+            nn.Dropout(0.5),
             nn.Linear(128,n_outputs)
         )
     def forward(self, x):
