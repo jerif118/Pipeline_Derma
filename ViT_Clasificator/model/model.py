@@ -9,16 +9,16 @@ class Model(nn.Module):
             for param in self.dino.parameters():
                 param.requires_grad=False
         self.bh = nn.Sequential(
-            nn.Linear(768,128),
+            nn.Linear(768,256),
             nn.ReLU(),
             nn.Dropout(0.5),
-            nn.Linear(128,n_binary)
+            nn.Linear(256,n_binary)
         )
         self.fh = torch.nn.Sequential(
-            nn.Linear(768,128),
+            nn.Linear(768,256),
             nn.ReLU(),
             nn.Dropout(0.5),
-            nn.Linear(128,n_outputs)
+            nn.Linear(256,n_outputs)
         )
     def forward(self, x):
         features = self.dino(x)
