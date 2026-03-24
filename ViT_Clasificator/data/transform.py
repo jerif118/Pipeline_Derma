@@ -17,12 +17,12 @@ def transforms_gpu_train(
     mean=(0.485, 0.456, 0.406),
     std=(0.229, 0.224, 0.225),
     hflip_p=0.5,
-    vflip_p=0.5,
-    rotation_deg=15,
-    color_jitter=(0.2, 0.2, 0.2, 0.05),
+    vflip_p=0.0,
+    rotation_deg=10,
+    color_jitter=(0.05, 0.05, 0.05, 0.02),
     affine_scale=(0.85, 1.15),
-    affine_translate=(0.1, 0.1),
-    crop_scale=(0.8, 1.0),
+    affine_translate=(0.03, 0.03),
+    crop_scale=(0.9, 1.0),
 ):
     return transforms.Compose([
         transforms.RandomResizedCrop(image_size, scale=crop_scale, ratio=(0.9, 1.1)),

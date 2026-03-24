@@ -9,11 +9,11 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def fit(model, dataloader, epochs=5, lr=0.001, w_bin=0.5, w_class=0.5, max_norm=1.0, log_path="training_log.csv", class_weights=None):
     model.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()),lr=lr,weight_decay=1e-4)
     criterion_bin = torch.nn.BCEWithLogitsLoss(reduction='none')
     if class_weights is not None:
         class_weights = torch.tensor(class_weights, dtype=torch.float32).to(device)
-    criterion_class = torch.nn.CrossEntropyLoss(weight=class_weights)
+    criterion_class = torch.nn.CrossEntropyLoss(weight=class_weights, label_smoothing=0.05)
     transform_train = transforms_gpu_train()
     transform_val = transforms_gpu_val()
     history = []
